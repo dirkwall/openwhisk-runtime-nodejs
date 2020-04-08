@@ -31,6 +31,7 @@ function NodeActionService(config) {
     let status = Status.ready;
     let server = undefined;
     let userCodeRunner = undefined;
+    let codeRunners = [];
 
     function setStatus(newStatus) {
         if (status !== Status.stopped) {
@@ -83,7 +84,7 @@ function NodeActionService(config) {
      *  req.body = { main: String, code: String, binary: Boolean }
      */
     this.initCode = function initCode(req) {
-        if (status === Status.ready && userCodeRunner === undefined) {
+        if (status === Status.ready){// && userCodeRunner === undefined) {
             setStatus(Status.starting);
 
             let body = req.body || {};
@@ -103,10 +104,10 @@ function NodeActionService(config) {
                 let msg = 'Missing main/no code to execute.';
                 return Promise.reject(errorMessage(403, msg));
             }
-        } else if (userCodeRunner !== undefined) {
-            let msg = 'Cannot initialize the action more than once.';
-            console.error('Internal system error:', msg);
-            return Promise.reject(errorMessage(403, msg));
+        //} else if (userCodeRunner !== undefined) {
+        //    let msg = 'Cannot initialize the action more than once.';
+        //    console.error('Internal system error:', msg);
+        //    return Promise.reject(errorMessage(403, msg));
         } else {
             let msg = `System not ready, status is ${status}.`;
             console.error('Internal system error:', msg);
@@ -123,7 +124,8 @@ function NodeActionService(config) {
      * req.body = { value: Object, meta { activationId : int } }
      */
     this.runCode = function runCode(req) {
-        if (status === Status.ready && userCodeRunner !== undefined) {
+        if (status === Status.ready){// && userCodeRunner !== undefined) {
+            
             if (!ignoreRunStatus) {
                 setStatus(Status.running);
             }
@@ -153,7 +155,8 @@ function NodeActionService(config) {
                 return Promise.reject(errorMessage(502, msg));
             });
         } else {
-            let msg = userCodeRunner ? `System not ready, status is ${status}.` : 'System not initialized.';
+            //let msg = userCodeRunner ? `System not ready, status is ${status}.` : 'System not initialized.';
+            let msg = `System not ready, status is ${status}.`;
             console.error('Internal system error:', msg);
             return Promise.reject(errorMessage(403, msg));
         }
@@ -173,7 +176,12 @@ function NodeActionService(config) {
 
         return initializeActionHandler(message)
             .then(handler => {
-                userCodeRunner = new NodeActionRunner(handler);
+                //userCodeRunner = new NodeActionRunner(handler);
+                codeRunners.push({
+                    key: message.name,
+                    handler: new NodeActionRunner(handler)
+                });
+                //console.log("initialized function " + message.name);
             })
             // emit error to activation log then flush the logs as this is the end of the activation
             .catch(error => {
@@ -192,7 +200,17 @@ function NodeActionService(config) {
             }
         });
 
-        return userCodeRunner
+        var key = msg.action_name;
+        codeRunner = getCodeRunner(key);
+
+        if (codeRunner == null) {
+            console.error(`Couldn't find codeRunner with key "${key}"`);
+        }
+        else {
+            //console.log("Found codeRunner: " + key);
+        }
+
+        return codeRunner
             .run(msg.value)
             .then(result => {
                 if (typeof result !== 'object') {
@@ -208,8 +226,17 @@ function NodeActionService(config) {
     }
 
     function writeMarkers() {
-        console.log('XXX_THE_END_OF_A_WHISK_ACTIVATION_XXX');
-        console.error('XXX_THE_END_OF_A_WHISK_ACTIVATION_XXX');
+        //console.log('XXX_THE_END_OF_A_WHISK_ACTIVATION_XXX');
+        //console.error('XXX_THE_END_OF_A_WHISK_ACTIVATION_XXX');
+    }
+
+    function getCodeRunner(key) {
+        for (i=0; i<codeRunners.length; i++) {
+            if (key == codeRunners[i].key) {
+                return codeRunners[i].handler;
+            }
+        }
+        return null;
     }
 }
 
