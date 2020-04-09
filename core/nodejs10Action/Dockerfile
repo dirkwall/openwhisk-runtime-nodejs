@@ -27,6 +27,6 @@ COPY . .
 COPY ./package.json /
 RUN cd / && npm install --no-package-lock \
     && npm cache clean --force
-EXPOSE 8080
+EXPOSE 8080 9229
 # The flag --experimental-worker enables worker threads, see https://nodejs.org/docs/latest-v10.x/api/worker_threads.html
-CMD node --experimental-worker --expose-gc app.js
+CMD node --experimental-worker --expose-gc --inspect=0.0.0.0:9229 app.js
