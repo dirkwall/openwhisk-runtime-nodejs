@@ -22,42 +22,29 @@ set -eux
 
 SCRIPTDIR=$(cd $(dirname "$0") && pwd)
 ROOTDIR="$SCRIPTDIR/../.."
-WHISKDIR="$ROOTDIR/../openwhisk"
-
-export OPENWHISK_HOME=$WHISKDIR
 
 IMAGE_PREFIX=$1
-RUNTIME_VERSION=$2
+RUNTIME=$2
 IMAGE_TAG=$3
 
-if [ ${RUNTIME_VERSION} == "8" ]; then
-  RUNTIME="nodejs8Action"
-elif [ ${RUNTIME_VERSION} == "10" ]; then
-  RUNTIME="nodejs10Action"
-elif [ ${RUNTIME_VERSION} == "12" ]; then
-  RUNTIME="nodejs12Action"
-fi
-
 if [[ ! -z ${DOCKER_USER} ]] && [[ ! -z ${DOCKER_PASSWORD} ]]; then
-docker login -u "${DOCKER_USER}" -p "${DOCKER_PASSWORD}"
+  docker login -u "${DOCKER_USER}" -p "${DOCKER_PASSWORD}"
 fi
 
 if [[ ! -z ${RUNTIME} ]]; then
-TERM=dumb ./gradlew \
-:core:${RUNTIME}:distDocker \
--PdockerRegistry=docker.io \
--PdockerImagePrefix=${IMAGE_PREFIX} \
--PdockerImageTag=${IMAGE_TAG}
+  TERM=dumb ./gradlew \
+    :core:${RUNTIME}:distDocker \
+    -PdockerRegistry=docker.io \
+    -PdockerImagePrefix=${IMAGE_PREFIX} \
+    -PdockerImageTag=${IMAGE_TAG}
 
   # if doing nightly also push a tag with the hash commit
   if [ ${IMAGE_TAG} == "nightly" ]; then
-  SHORT_COMMIT=`git rev-parse --short HEAD`
-  TERM=dumb ./gradlew \
-  :core:${RUNTIME}:distDocker \
-  -PdockerRegistry=docker.io \
-  -PdockerImagePrefix=${IMAGE_PREFIX} \
-  -PdockerImageTag=${SHORT_COMMIT}
+    SHORT_COMMIT=`git rev-parse --short HEAD`
+    TERM=dumb ./gradlew \
+      :core:${RUNTIME}:distDocker \
+      -PdockerRegistry=docker.io \
+      -PdockerImagePrefix=${IMAGE_PREFIX} \
+      -PdockerImageTag=${SHORT_COMMIT}
   fi
-
-
 fi

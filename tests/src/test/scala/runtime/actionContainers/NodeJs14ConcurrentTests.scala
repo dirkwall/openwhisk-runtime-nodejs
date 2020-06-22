@@ -15,16 +15,13 @@
  * limitations under the License.
  */
 
-ext.dockerImageName = 'action-typescript-v3.7'
-apply from: '../../gradle/docker.gradle'
+package runtime.actionContainers
 
-distDocker.dependsOn 'copyPackageJson'
+import org.junit.runner.RunWith
+import org.scalatest.junit.JUnitRunner
 
-task copyPackageJson(type: Copy) {
-    from '../nodejsActionBase/package.json'
-    into '.'
-}
-
-task cleanup(type: Delete) {
-    delete 'package.json'
+@RunWith(classOf[JUnitRunner])
+class NodeJs14ConcurrentTests extends NodeJsConcurrentTests {
+  override lazy val nodejsContainerImageName = "action-nodejs-v14"
+  override lazy val nodejsTestDockerImageName = "nodejs14docker"
 }

@@ -17,28 +17,11 @@
 #
 -->
 
-# NodeJS 12 OpenWhisk Runtime Container
+# NodeJS 14 OpenWhisk Runtime Container
 
 ## Next release
 Changes:
-  - Update OpenWhisk npm package
+  - Initial release
 
-Node.js version = [12.18.0](https://nodejs.org/en/blog/release/v12.18.0/)
+Node.js version = [14.4.0](https://nodejs.org/en/blog/release/v14.4.0/)
 OpenWhisk version = [OpenWhisk v3.21.2](https://www.npmjs.com/package/openwhisk)
-
-## Apache 1.15
-Changes:
-  - Update Node.js
-  - Update OpenWhisk npm package
-  - Support for __OW_ACTION_VERSION (openwhisk/4761)
-
-Node.js version = [12.15.0](https://nodejs.org/en/blog/release/v12.15.0/)
-OpenWhisk version = [OpenWhisk v3.21.1](https://www.npmjs.com/package/openwhisk)
-
-## Apache 1.14
-Changes:
-- Adding Nodejs version 12
-- Node.js version = [12.8.1](https://nodejs.org/en/blog/release/v12.8.1/)
-- [OpenWhisk v3.18.0](https://www.npmjs.com/package/openwhisk) - JavaScript client library for the OpenWhisk platform. Provides a wrapper around the OpenWhisk APIs.
-
-Node.js version = [12.1.0](https://nodejs.org/en/blog/release/v12.1.0/)

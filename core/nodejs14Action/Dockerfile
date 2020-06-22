@@ -15,24 +15,29 @@
 # limitations under the License.
 #
 
-FROM node:10.20.1-stretch
+FROM node:14.4.0-stretch
+
+# Initial update and some basics.
+#
 RUN apt-get update && apt-get install -y \
     imagemagick \
     graphicsmagick \
     unzip \
     && rm -rf /var/lib/apt/lists/*
+
+# Add sources and copy the package.json to root container,
+# so npm packages from user functions take precendence.
+#
 WORKDIR /nodejsAction
-# COPY source code "*.js" from nodejsActionBase to current working dir
-RUN mkdir /src /platform
-COPY ./core/nodejsActionBase/*.js ./
-COPY ./core/nodejsActionBase/src/*.js ./src/
-COPY ./core/nodejsActionBase/platform/*.js ./platform/
-COPY . .
-# COPY the package.json to root container, so we can install npm packages a level up from user's packages,
-# so user's packages take precedence
-COPY ./core/nodejsActionBase/package.json /
-RUN cd / && npm install --no-package-lock \
+ADD  . /nodejsAction/
+COPY package.json /
+
+# Customize runtime with additional packages.
+# Install package globally so user packages can override.
+#
+RUN cd / && npm install --no-package-lock --production \
     && npm cache clean --force
+
 EXPOSE 8080
-# The flag --experimental-worker enables worker threads, see https://nodejs.org/docs/latest-v10.x/api/worker_threads.html
-CMD node --experimental-worker --expose-gc app.js
+
+CMD node --expose-gc app.js
